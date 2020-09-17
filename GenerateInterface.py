@@ -11,10 +11,41 @@ import tkMessageBox
 
 
 
-class GenerateInterface:
+class GenerateGuid:
     
     @staticmethod
-    def generate(clsid, interface, parent=None):
+    def generate1(interface):
+
+	guid1=uuid.uuid4()
+	guid2=uuid.uuid4()
+	guid11=str(guid1).split('-')
+	guid21=str(guid2).split('-')
+	guid12=[guid11[0], guid11[1], guid11[2], guid11[3][0:2], guid11[3][2:4], guid11[4][0:2], guid11[4][2:4], guid11[4][4:6], guid11[4][6:8], guid11[4][8:10], guid11[4][10:12] ]
+	guid22=[guid21[0], guid21[1], guid21[2], guid21[3][0:2], guid21[3][2:4], guid21[4][0:2], guid21[4][2:4], guid21[4][4:6], guid21[4][6:8], guid21[4][8:10], guid21[4][10:12] ]        
+
+	content_format=u'' \
+	+ u"////////////////////////////////////////////////////////////////////////////\n"  \
+	+ u"\n" \
+	+ u"//定义接口标识\n" \
+	+ u"// IID { %s }\n" \
+	+ u"// IID { %s }\n" \
+	+ u"#ifdef _UNICODE\n" \
+	+ u"\t#define VER_%s INTERFACE_VERSION(1, 1)\n" \
+	+ u"\tstatic const GUID IID_%s = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
+	+ u"#else\n" \
+	+ u"\t#define VER_%s INTERFACE_VERSION(1, 1)\n" \
+	+ u"\tstatic const GUID IID_%s = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
+	+ u"#endif"
+
+	content = content_format % (str(guid1).upper(), str(guid2).upper(), 
+	        interface, interface, guid12[0], guid12[1], guid12[2], guid12[3], guid12[4], guid12[5], guid12[6], guid12[7], guid12[8], guid12[9], guid12[10],
+	        interface, interface, guid22[0], guid22[1], guid22[2], guid22[3], guid22[4], guid22[5], guid22[6], guid22[7], guid22[8], guid22[9], guid22[10])
+
+	return content
+     
+    
+    @staticmethod
+    def generate2(interface):
         
         guid1=uuid.uuid4()
         guid2=uuid.uuid4()
@@ -30,11 +61,178 @@ class GenerateInterface:
         + u"// IID { %s }\n" \
         + u"// IID { %s }\n" \
         + u"#ifdef _UNICODE\n" \
-        + u"\t#define VER_%s INTERFACE_VERSION(1, 1)\n" \
-        + u"\tstatic const GUID IID_%s = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
+        + u"\tstatic const GUID %s_IID = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
         + u"#else\n" \
-        + u"\t#define VER_%s INTERFACE_VERSION(1, 1)\n" \
-        + u"\tstatic const GUID IID_%s = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
+        + u"\tstatic const GUID %s_IID = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
+        + u"#endif" 
+        
+        content = content_format % (str(guid1).upper(), str(guid2).upper(), 
+                 interface, guid12[0], guid12[1], guid12[2], guid12[3], guid12[4], guid12[5], guid12[6], guid12[7], guid12[8], guid12[9], guid12[10],
+                 interface, guid22[0], guid22[1], guid22[2], guid22[3], guid22[4], guid22[5], guid22[6], guid22[7], guid22[8], guid22[9], guid22[10])
+
+        return content
+
+    
+
+class GenerateInterface:
+    
+    @staticmethod
+    def generate1(clsid, interface, parent=None):
+
+	if clsid == "interface":
+	    
+	    content_format=u'' \
+	    + u"//接口\n" \
+	    + u"%s %s : public %s\n" \
+	    + u"{\n" \
+	    + u"public:\n" \
+	    + u"\n" \
+	    + u"};\n" \
+	    + u"\n" 
+	    
+	    content = content_format % (clsid, interface, parent or u"IUnknownEx")
+	    
+	elif clsid == "class":
+	    
+	    content_format=u'' \
+	    + u"//类\n" \
+	    + u"%s %s%s\n" \
+	    + u"{\n" \
+	    + u"public:\n" \
+	    + u"\t//构造函数\n" \
+	    + u"\t%s() { }\n" \
+	    + u"\t//析构函数\n" \
+	    + u"\tvirtual ~%s() { }\n" \
+	    + u"\n" \
+	    + u"};\n" \
+	    + u"\n" 
+	    
+	    parent = parent and u" : public %s"%(parent)
+	    content = content_format % (clsid, interface, parent or u"", interface, interface)
+	    
+	else:
+	    content_format=u'' \
+	    + u"//结构\n" \
+	    + u"%s %s%s\n" \
+	    + u"{\n" \
+	    + u"\n" \
+	    + u"};\n" \
+	    + u"\n" 
+	    
+	    parent = parent and u" : public %s"%(parent)
+	    content = content_format % (clsid, interface, parent or u"")
+
+	return content
+
+    @staticmethod
+    def generate2(clsid, interface, parent=None):
+
+	if clsid == "interface":
+	    
+	    content_format=u'' \
+	    + u"//接口\n" \
+	    + u"%s %s : public %s\n" \
+	    + u"{\n" \
+	    + u"public:\n" \
+	    + u"\n" \
+	    + u"};\n" \
+	    + u"\n" 
+	    
+	    content = content_format % (clsid, interface, parent or u"base::IUnknown")
+	    
+	elif clsid == "class":
+	    
+	    content_format=u'' \
+	    + u"//类\n" \
+	    + u"%s %s%s\n" \
+	    + u"{\n" \
+	    + u"public:\n" \
+	    + u"\t//构造函数\n" \
+	    + u"\t%s() { }\n" \
+	    + u"\t//析构函数\n" \
+	    + u"\tvirtual ~%s() { }\n" \
+	    + u"\n" \
+	    + u"};\n" \
+	    + u"\n" 
+	    
+	    parent = parent and u" : public %s"%(parent)
+	    content = content_format % (clsid, interface, parent or u"", interface, interface)
+	    
+	else:
+	    content_format=u'' \
+	    + u"//结构\n" \
+	    + u"%s %s%s\n" \
+	    + u"{\n" \
+	    + u"\n" \
+	    + u"};\n" \
+	    + u"\n" 
+	    
+	    parent = parent and u" : public %s"%(parent)
+	    content = content_format % (clsid, interface, parent or u"")
+
+	return content    
+    
+class GenerateInterfaceEx:
+    
+    @staticmethod
+    def generate1(clsid, interface, parent=None):
+
+	guid1=uuid.uuid4()
+	guid2=uuid.uuid4()
+	guid11=str(guid1).split('-')
+	guid21=str(guid2).split('-')
+	guid12=[guid11[0], guid11[1], guid11[2], guid11[3][0:2], guid11[3][2:4], guid11[4][0:2], guid11[4][2:4], guid11[4][4:6], guid11[4][6:8], guid11[4][8:10], guid11[4][10:12] ]
+	guid22=[guid21[0], guid21[1], guid21[2], guid21[3][0:2], guid21[3][2:4], guid21[4][0:2], guid21[4][2:4], guid21[4][4:6], guid21[4][6:8], guid21[4][8:10], guid21[4][10:12] ]        
+
+	content_format=u'' \
+	+ u"////////////////////////////////////////////////////////////////////////////\n"  \
+	+ u"\n" \
+	+ u"//定义接口标识\n" \
+	+ u"// IID { %s }\n" \
+	+ u"// IID { %s }\n" \
+	+ u"#ifdef _UNICODE\n" \
+	+ u"\t#define VER_%s INTERFACE_VERSION(1, 1)\n" \
+	+ u"\tstatic const GUID IID_%s = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
+	+ u"#else\n" \
+	+ u"\t#define VER_%s INTERFACE_VERSION(1, 1)\n" \
+	+ u"\tstatic const GUID IID_%s = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
+	+ u"#endif\n" \
+	+ u"\n" \
+	+ u"//接口\n" \
+	+ u"%s %s : public %s\n" \
+	+ u"{\n" \
+	+ u"public:\n" \
+	+ u"\n" \
+	+ u"};\n" \
+	+ u"\n" 
+
+	content = content_format % (str(guid1).upper(), str(guid2).upper(), 
+	                            interface, interface, guid12[0], guid12[1], guid12[2], guid12[3], guid12[4], guid12[5], guid12[6], guid12[7], guid12[8], guid12[9], guid12[10],
+	         interface, interface, guid22[0], guid22[1], guid22[2], guid22[3], guid22[4], guid22[5], guid22[6], guid22[7], guid22[8], guid22[9], guid22[10],
+	         clsid, interface, parent or u"IUnknownEx")
+
+	return content
+
+    @staticmethod
+    def generate2(clsid, interface, parent=None):
+        
+        guid1=uuid.uuid4()
+        guid2=uuid.uuid4()
+        guid11=str(guid1).split('-')
+        guid21=str(guid2).split('-')
+        guid12=[guid11[0], guid11[1], guid11[2], guid11[3][0:2], guid11[3][2:4], guid11[4][0:2], guid11[4][2:4], guid11[4][4:6], guid11[4][6:8], guid11[4][8:10], guid11[4][10:12] ]
+        guid22=[guid21[0], guid21[1], guid21[2], guid21[3][0:2], guid21[3][2:4], guid21[4][0:2], guid21[4][2:4], guid21[4][4:6], guid21[4][6:8], guid21[4][8:10], guid21[4][10:12] ]        
+    
+        content_format=u'' \
+        + u"////////////////////////////////////////////////////////////////////////////\n"  \
+        + u"\n" \
+        + u"//定义接口标识\n" \
+        + u"// IID { %s }\n" \
+        + u"// IID { %s }\n" \
+        + u"#ifdef _UNICODE\n" \
+        + u"\tstatic const GUID %s_IID = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
+        + u"#else\n" \
+        + u"\tstatic const GUID %s_IID = { 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s, 0x%s };\n" \
         + u"#endif\n" \
         + u"\n" \
         + u"//接口\n" \
@@ -46,14 +244,11 @@ class GenerateInterface:
         + u"\n" 
         
         content = content_format % (str(guid1).upper(), str(guid2).upper(), 
-                 interface, interface, guid12[0], guid12[1], guid12[2], guid12[3], guid12[4], guid12[5], guid12[6], guid12[7], guid12[8], guid12[9], guid12[10],
-                 interface, interface, guid22[0], guid22[1], guid22[2], guid22[3], guid22[4], guid22[5], guid22[6], guid22[7], guid22[8], guid22[9], guid22[10],
-                 clsid, interface, parent or "base::IUnknown")
+                 interface, guid12[0], guid12[1], guid12[2], guid12[3], guid12[4], guid12[5], guid12[6], guid12[7], guid12[8], guid12[9], guid12[10],
+                 interface, guid22[0], guid22[1], guid22[2], guid22[3], guid22[4], guid22[5], guid22[6], guid22[7], guid22[8], guid22[9], guid22[10],
+                 clsid, interface, parent or u"base::IUnknown")
 
-        return content
-    
-    
-    
+        return content   
 
 
 class MainDialog:
@@ -99,26 +294,63 @@ class MainDialog:
         lab_parent_inerface_name = Tkinter.Label(frame1, text = "父类接口名称:")
         lab_parent_inerface_name.pack(side=Tkinter.LEFT, padx = 0, pady = 10)        
         self.txt_parent_inerface_name = Tkinter.Entry(frame1)
-        self.txt_parent_inerface_name.pack(side=Tkinter.LEFT, padx = 4,  pady = 10)        
-        
+        self.txt_parent_inerface_name.pack(side=Tkinter.LEFT, padx = 4,  pady = 10)   
+
         frame2 = Tkinter.Frame(paned)
-        frame2.pack(side=Tkinter.BOTTOM)
+        frame2.pack()
+	
+	self.radio_value1 = Tkinter.IntVar()
+	btn_generate_old = Tkinter.Radiobutton(frame2, text = "旧接口", variable=self.radio_value1, value=1, width = 6, height = 1)
+	btn_generate_new = Tkinter.Radiobutton(frame2, text = "新接口", variable=self.radio_value1, value=2, width = 6, height = 1)
+	btn_generate_old.pack(side=Tkinter.LEFT, padx = 2, pady = 2)
+	btn_generate_new.pack(side=Tkinter.LEFT, padx = 2, pady = 2)
+	btn_generate_new.select()	
         
-        btn_generate = Tkinter.Button(frame2, text = "生成", width = 16, height = 2, command = self.OnBtnGenerate)
-        btn_copy = Tkinter.Button(frame2, text = "复制", width = 16, height = 2, command = self.OnBtnCopy)
+        self.radio_value2 = Tkinter.IntVar()
+        btn_generate_all = Tkinter.Radiobutton(frame2, text = "全部", variable=self.radio_value2, value=1, width = 6, height = 1)
+	btn_generate_define = Tkinter.Radiobutton(frame2, text = "定义", variable=self.radio_value2, value=2, width = 6, height = 1)
+	btn_generate_guid = Tkinter.Radiobutton(frame2, text = "GUID", variable=self.radio_value2, value=3, width = 6, height = 1)
+        btn_generate_all.pack(side=Tkinter.LEFT, padx = 2, pady = 2)
+	btn_generate_define.pack(side=Tkinter.LEFT, padx = 2, pady = 2)
+	btn_generate_guid.pack(side=Tkinter.LEFT, padx = 2, pady = 2)
+	btn_generate_all.select()
+        
+        frame3 = Tkinter.Frame(paned)
+        frame3.pack(side=Tkinter.BOTTOM)
+        
+        btn_generate = Tkinter.Button(frame3, text = "生成", width = 16, height = 2, command = self.OnBtnGenerate)
+        btn_copy = Tkinter.Button(frame3, text = "复制", width = 16, height = 2, command = self.OnBtnCopy)
         btn_generate.pack(side=Tkinter.LEFT, padx = 10, pady = 10)
         btn_copy.pack(side=Tkinter.LEFT, padx = 10, pady = 10)
-        
-        
+		
+		
     def OnBtnGenerate(self):
         
         interface_clsid = self.txt_inerface_clsid.get()
-        inerface_name = self.txt_inerface_name.get() or "IClassName"
+        inerface_name = self.txt_inerface_name.get()
+	if not inerface_name:
+	    if interface_clsid == u"interface": inerface_name = u"IClassName"
+	    if interface_clsid == u"class": inerface_name = u"ClassName"
+	    if interface_clsid == u"struct": inerface_name = u"StructName"
+	
         parent_inerface_name = self.txt_parent_inerface_name.get() or None
         self.txt_inerface_name.delete(0, Tkinter.END)
         self.txt_inerface_name.insert(Tkinter.END, inerface_name)
-        
-        content = GenerateInterface.generate(interface_clsid, inerface_name, parent_inerface_name)
+	
+	if self.radio_value1.get() == 1:
+	    if self.radio_value2.get() == 1:
+		content = GenerateInterfaceEx.generate1(interface_clsid, inerface_name, parent_inerface_name)
+	    elif self.radio_value2.get() == 2:
+		content = GenerateInterface.generate1(interface_clsid, inerface_name, parent_inerface_name)		
+	    else:
+		content = GenerateGuid.generate1(inerface_name)      
+	else:
+	    if self.radio_value2.get() == 1:
+		content = GenerateInterfaceEx.generate2(interface_clsid, inerface_name, parent_inerface_name)
+	    elif self.radio_value2.get() == 2:
+		content = GenerateInterface.generate2(interface_clsid, inerface_name, parent_inerface_name)
+	    else:
+		content = GenerateGuid.generate2(inerface_name)
         
         self.txt_content.configure(state = Tkinter.NORMAL)
         self.txt_content.delete(1.0, Tkinter.END)
